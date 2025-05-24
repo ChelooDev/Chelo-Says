@@ -1,10 +1,15 @@
-export default function Pad(props){
+export default function Pad(props) {
     return (
         <button 
-        style={{backgroundColor : props.color}}
-        onClick={() => props.toggle(props.id)}
-        className={props.on ? "on" : "off"}
-        >  
+            type="button"
+            style={{ backgroundColor: props.color }}
+            onClick={(e) => {
+                e.preventDefault();
+                props.toggle(props.id);
+            }}
+
+            className={`pad-button ${props.on ? "on" : ""}`}
+        >
         </button>
     )
 }

@@ -2,7 +2,7 @@ export default [
     {
         id: 1,
         color: "#F18D8B",
-        on: true
+        on: false
     },   
     {
         id: 2,
@@ -12,12 +12,12 @@ export default [
     {
         id: 3,
         color: "#EEEC79",
-        on: true
+        on: false
     },   
     {
         id: 4,
         color: "#64ED98",
-        on: true
+        on: false
     },   
     {
         id: 5,
@@ -37,12 +37,12 @@ export default [
     {
         id: 8,
         color: "#F289C1",
-        on: true
+        on: false
     },   
     {
         id: 9,
         color: "#FFB6C1",
-        on: true
+        on: false
     },   
     {
         id: 10,
@@ -52,7 +52,7 @@ export default [
     {
         id: 11,
         color: "#98FB98",
-        on: true
+        on: false
     },   
     {
         id: 12,
@@ -62,7 +62,7 @@ export default [
     {
         id: 13,
         color: "#DDA0DD",
-        on: true
+        on: false
     },   
     {
         id: 14,
@@ -72,7 +72,7 @@ export default [
     {
         id: 15,
         color: "#20B2AA",
-        on: true
+        on: false
     },   
     {
         id: 16,
