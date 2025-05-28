@@ -10,7 +10,7 @@ const LEVELS = {
 
 export default function App() {
   const [difficulty, setDifficulty] = React.useState(LEVELS.MEDIUM);
-  const [pads, setPads] = React.useState(padsData);
+  const [pads, padHighlight] = React.useState(padsData);
   const [sequence, setSequence] = React.useState([]);
   const [userStep, setUserStep] = React.useState(0);
   const [gameOver, setGameOver] = React.useState(false);
@@ -23,16 +23,16 @@ export default function App() {
   React.useEffect(() => {
     switch (difficulty) {
       case LEVELS.EASY:
-        setPads(padsData.slice(0, 4));
+        padHighlight(padsData.slice(0, 4));
         break;
       case LEVELS.MEDIUM:
-        setPads(padsData.slice(0, 9));
+        padHighlight(padsData.slice(0, 9));
         break;
       case LEVELS.HARD:
-        setPads(padsData);
+        padHighlight(padsData);
         break;
       default:
-        setPads(padsData);
+        padHighlight(padsData);
     }
   }, [difficulty]);
 
@@ -45,21 +45,21 @@ export default function App() {
   }
 
   async function showSequence(seq) {
-    const sequenceDelay = speed === "fast" ? 200 : 400;
+    const sequenceDelay = speed === "fast" ? 200 : 350;
     setIsShowingSequence(true);
     await delay(sequenceDelay);
 
     for (let id of seq) {
       if (cancelRef.current) break;
 
-      setPads((prev) =>
+      padHighlight((prev) =>
         prev.map((item) => (item.id === id ? { ...item, on: true } : item))
       );
       await delay(sequenceDelay);
 
       if (cancelRef.current) break;
 
-      setPads((prev) =>
+      padHighlight((prev) =>
         prev.map((item) => (item.id === id ? { ...item, on: false } : item))
       );
       await delay(sequenceDelay);
@@ -90,26 +90,26 @@ export default function App() {
 
     setUserInput((prev) => [...prev, pads.find((p) => p.id === id)]);
 
-    setPads((prev) =>
+    padHighlight((prev) =>
       prev.map((item) => (item.id === id ? { ...item, on: true } : item))
     );
 
-    await delay(1);
+    await delay(100);
 
-    setPads((prev) =>
+    padHighlight((prev) =>
       prev.map((item) => (item.id === id ? { ...item, on: false } : item))
     );
-
     const isCorrect = id === sequence[userStep];
     const isOnLastStep = userStep === sequence.length - 1;
 
     if (isCorrect) {
+      setUserStep((prev) => prev + 1);
       if (isOnLastStep) {
         await delay(300);
 
         const nextPad = generateRandomPad();
         const newSequence = [...sequence, nextPad];
-
+        await delay(50);
         setSequence(newSequence);
         setUserStep(0);
         setUserInput([]);
@@ -117,8 +117,6 @@ export default function App() {
         await showSequence(newSequence);
 
         setUserInput([]);
-      } else {
-        setUserStep((prev) => prev + 1);
       }
     } else {
       setGameOver(true);
@@ -193,7 +191,7 @@ export default function App() {
                       🐢 Slow
                     </span>
                     <span className={speed === "fast" ? "active-speed" : ""}>
-                      🚀 Fast
+                      Fast 🚀
                     </span>
                   </div>
                 </div>
