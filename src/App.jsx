@@ -1,89 +1,74 @@
 import React from "react";
-import padsData from "./pads"; // Assuming padsData is defined elsewhere
-import Pad from "./Pad"; // Assuming Pad component is defined elsewhere
+
+import padsData from "./pads";
+
+import Pad from "./Pad";
 
 const LEVELS = {
   EASY: "easy",
+
   MEDIUM: "medium",
+
   HARD: "hard",
 };
 
 export default function App() {
   const [difficulty, setDifficulty] = React.useState(LEVELS.MEDIUM);
+
   const [pads, setPads] = React.useState(padsData);
+
   const [sequence, setSequence] = React.useState([]);
+
   const [userStep, setUserStep] = React.useState(0);
+
   const [gameOver, setGameOver] = React.useState(false);
+
   const [gameStarted, setGameStarted] = React.useState(false);
+
   const [isShowingSequence, setIsShowingSequence] = React.useState(false);
+
   const [userInput, setUserInput] = React.useState([]);
+
   const [speed, setSpeed] = React.useState(null);
+
   const cancelRef = React.useRef(false);
 
-  // NEW STATE: to control the visibility of the starting screen
   const [showStartScreen, setShowStartScreen] = React.useState(true);
-
   React.useEffect(() => {
     switch (difficulty) {
       case LEVELS.EASY:
         setPads(padsData.slice(0, 4));
+
         break;
+
       case LEVELS.MEDIUM:
         setPads(padsData.slice(0, 9));
+
         break;
+
       case LEVELS.HARD:
         setPads(padsData);
+
         break;
+
       default:
         setPads(padsData);
     }
   }, [difficulty]);
-
-  React.useEffect(() => {
-    if (
-      gameStarted &&
-      !gameOver &&
-      !isShowingSequence &&
-      userInput.length > 0
-    ) {
-      const lastClickedPad = userInput[userInput.length - 1];
-      const expectedPadId = sequence[userStep];
-
-      if (lastClickedPad.id === expectedPadId) {
-        if (userStep === sequence.length - 1) {
-          const advanceLevel = async () => {
-            await delay(300);
-
-            const nextPad = generateRandomPad();
-            const newSequence = [...sequence, nextPad];
-
-            setSequence(newSequence);
-            setUserStep(0);
-            setUserInput([]);
-            await delay(500);
-            await showSequence(newSequence);
-          };
-          advanceLevel();
-        } else {
-          setUserStep((prev) => prev + 1);
-        }
-      } else {
-        setGameOver(true);
-      }
-    }
-  }, [userInput, userStep, sequence, gameStarted, gameOver, isShowingSequence]);
 
   function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
   function generateRandomPad() {
-    return pads[Math.floor(Math.random() * pads.length)].id;
+    return pads[Math.floor(Math.random() * (pads.length + 1))].id;
   }
 
   async function showSequence(seq) {
     const sequenceDelay = speed === "fast" ? 200 : 350;
+
     setIsShowingSequence(true);
+
     await delay(sequenceDelay);
 
     for (let id of seq) {
@@ -92,6 +77,7 @@ export default function App() {
       setPads((prev) =>
         prev.map((item) => (item.id === id ? { ...item, on: true } : item))
       );
+
       await delay(sequenceDelay);
 
       if (cancelRef.current) break;
@@ -99,6 +85,7 @@ export default function App() {
       setPads((prev) =>
         prev.map((item) => (item.id === id ? { ...item, on: false } : item))
       );
+
       await delay(sequenceDelay);
     }
 
@@ -107,14 +94,23 @@ export default function App() {
 
   async function startGame() {
     const initialPad = generateRandomPad();
+
     const newSequence = [initialPad];
+
     setGameStarted(true);
+
     cancelRef.current = true;
+
     await delay(50);
+
     cancelRef.current = false;
+
     setSequence(newSequence);
+
     setUserStep(0);
+
     setGameOver(false);
+
     setUserInput([]);
 
     await delay(1000);
@@ -124,27 +120,39 @@ export default function App() {
 
   async function handleUserClick(id) {
     if (!gameStarted || gameOver || isShowingSequence) return;
-
     setUserInput((prev) => [...prev, pads.find((p) => p.id === id)]);
-
     setPads((prev) =>
       prev.map((item) => (item.id === id ? { ...item, on: true } : item))
     );
-
-    await delay(100);
-
+    await delay(1);
     setPads((prev) =>
       prev.map((item) => (item.id === id ? { ...item, on: false } : item))
     );
+    const isCorrect = id === sequence[userStep];
+    const isOnLastStep = userStep === sequence.length - 1;
+
+    if (isCorrect) {
+      setUserStep((prev) => prev + 1);
+      if (isOnLastStep) {
+        await delay(300);
+        const nextPad = generateRandomPad();
+        const newSequence = [...sequence, nextPad];
+        setSequence(newSequence);
+        setUserStep(0);
+        setUserInput([]);
+        await delay(500);
+        await showSequence(newSequence);
+        setUserInput([]);
+      }
+    } else {
+      setGameOver(true);
+    }
   }
 
   function playAgain() {
     setGameOver(false);
+
     setGameStarted(false);
-    setSequence([]);
-    setUserStep(0);
-    setUserInput([]);
-    setSpeed(null);
   }
 
   const buttonElements = pads.map((padProperties) => (
@@ -167,7 +175,6 @@ export default function App() {
     setUserInput([]);
     setSpeed(null);
   }
-
   function handleAdvanceToMain() {
     setShowStartScreen(false);
   }
@@ -177,7 +184,7 @@ export default function App() {
       {showStartScreen ? (
         <div className="start-screen">
           <h1>Welcome to Chelo Says!</h1>
-          <p>Let's see if you can make Chelo happy.</p>
+          <p>Let's see if you can make Chelo proud.</p>
           <button className="start-button" onClick={handleAdvanceToMain}>
             Start Game
           </button>
