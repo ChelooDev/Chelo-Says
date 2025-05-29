@@ -124,7 +124,6 @@ export default function App() {
     setPads((prev) =>
       prev.map((item) => (item.id === id ? { ...item, on: true } : item))
     );
-    await delay(1);
     setPads((prev) =>
       prev.map((item) => (item.id === id ? { ...item, on: false } : item))
     );
@@ -213,13 +212,6 @@ export default function App() {
                   Hard
                 </button>
                 <div className="speedAndStart">
-                  <button
-                    className="startButton control-button"
-                    onClick={startGame}
-                    disabled={!speed}
-                  >
-                    Start Game
-                  </button>
                   <div>
                     <div>
                       <div
@@ -243,6 +235,14 @@ export default function App() {
                       </div>
                     </div>
                   </div>
+                  {speed ? (
+                    <button
+                      className="startButton control-button"
+                      onClick={startGame}
+                    >
+                      Go
+                    </button>
+                  ) : null}
                 </div>
               </div>
             )}
