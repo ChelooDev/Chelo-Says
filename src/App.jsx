@@ -150,7 +150,7 @@ export default function App() {
 
   function playAgain() {
     setGameOver(false);
-
+    setSpeed(null);
     setGameStarted(false);
   }
 
