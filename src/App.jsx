@@ -235,14 +235,13 @@ export default function App() {
                       </div>
                     </div>
                   </div>
-                  {speed ? (
-                    <button
-                      className="startButton control-button"
-                      onClick={startGame}
-                    >
-                      Go
-                    </button>
-                  ) : null}
+                  <button
+                    className="startButton control-button"
+                    onClick={startGame}
+                    disabled={!speed}
+                  >
+                    Go
+                  </button>
                 </div>
               </div>
             )}
