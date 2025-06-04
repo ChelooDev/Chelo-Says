@@ -120,7 +120,7 @@ header {
   border: 2px solid rgba(255, 255, 255, 0.2);
   border-radius: clamp(10px, 2vw, 20px);
   cursor: pointer;
-  opacity: 0.85;
+  opacity: 0.6;
   background: linear-gradient(145deg, #3e3b36, #1c1917);
   box-shadow: 0 8px 16px rgba(0, 0, 0, 0.6);
   transition: all 0.3s ease;
@@ -251,6 +251,79 @@ header {
   }
 }
 
+@media (max-width: 768px) and (orientation: portrait) {
+  .control-button {
+    font-size: clamp(2rem, 5vw, 3rem);
+    padding: clamp(1.5rem, 4vw, 2rem);
+    margin-top: 1.5rem;
+    min-width: 200px;
+  }
+
+  .controls {
+    margin-top: 7rem;
+    gap: 1.5rem;
+  }
+
+  .slowButton,
+  .normalButton,
+  .fastButton {
+    font-size: 3rem;
+    padding: 2rem 3.5rem;
+  }
+
+  .game-area {
+    margin-top: 4rem;
+  }
+
+  .pad-button {
+    border-width: 5px;
+  }
+
+  .high-scores {
+    top: 6rem;
+    right: 0.5rem;
+    font-size: 1.4rem;
+    padding: 2rem;
+  }
+
+  .high-scores h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1rem;
+  }
+
+  .score-item {
+    padding: 1rem;
+    font-size: 1.4rem;
+  }
+
+  .status-bar {
+    margin-top: 5rem;
+    gap: 2rem;
+  }
+
+  .game-over,
+  .play-again {
+    font-size: 2.5rem;
+    padding: 2.5rem;
+    padding-bottom: 7rem;
+  }
+
+  .level-indicator {
+    font-size: 2.5rem;
+    padding: 2rem;
+  }
+
+  .user-sequence-item {
+    width: clamp(50px, 10vw, 70px);
+    height: clamp(50px, 10vw, 70px);
+    border-width: 3px;
+  }
+
+  header {
+    min-height: 160px;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -310,7 +383,16 @@ header {
   background: linear-gradient(145deg, #63deed, #afeeee);
   text-align: left;
   font-size: 2rem;
-  padding-right: 4rem;
+  padding-right: 3rem;
+  width: auto;
+}
+
+.normalButton {
+  background: linear-gradient(145deg, #98fb98, #64ed98);
+  text-align: center;
+  font-size: 2rem;
+  padding-right: 3rem;
+  width: auto;
 }
 
 .fastButton {
@@ -320,7 +402,8 @@ header {
   align-items: center;
   text-align: center;
   font-size: 2rem;
-  padding-right: 4rem;
+  padding-right: 3rem;
+  width: auto;
 }
 
 .continueButton,
@@ -395,23 +478,25 @@ header {
 
 .auth-buttons {
   position: fixed;
-  top: 1rem;
-  left: 1rem;
+  top: 0.5rem;
+  left: 0.5rem;
   z-index: 100;
 }
 
 .auth-button {
   background: linear-gradient(145deg, #63deed, #afeeee);
   color: #1c1917;
-  padding: 0.75rem 1.5rem;
+  padding: 0.9rem 1.5rem;
+  padding-top: 0.6rem;
   border: none;
-  border-radius: 0.75rem;
+  border-radius: 2rem;
   cursor: pointer;
   font-weight: bold;
   transition: all 0.3s ease;
-  font-size: 1.1rem;
-  min-width: 180px;
+  font-size: 1rem;
+  min-width: 100px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  max-height: 2.2rem;
 }
 
 .auth-button:disabled {

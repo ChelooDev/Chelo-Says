@@ -84,7 +84,8 @@ export default function App() {
   }
 
   async function showSequence(seq) {
-    const sequenceDelay = speed === "fast" ? 200 : 350;
+    const sequenceDelay =
+      speed === "fast" ? 150 : speed === "normal" ? 250 : 350;
 
     setIsShowingSequence(true);
 
@@ -231,7 +232,7 @@ export default function App() {
                 : "Sign in with Google"
             }
           >
-            Sign in with Google
+            Sign in
           </button>
         )}
       </div>
@@ -293,6 +294,14 @@ export default function App() {
                       onClick={() => setSpeed("slow")}
                     >
                       🐢 Slow
+                    </button>
+                    <button
+                      className={`normalButton control-button ${
+                        speed === "normal" ? "active" : ""
+                      }`}
+                      onClick={() => setSpeed("normal")}
+                    >
+                      ⚡ Normal
                     </button>
                     <button
                       className={`fastButton control-button ${
