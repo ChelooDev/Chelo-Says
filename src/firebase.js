@@ -63,14 +63,16 @@ export const updateHighScore = async (userId, difficulty, score) => {
     const userDoc = await getDoc(userDocRef);
     const currentData = userDoc.data();
 
-    if (score > (currentData.highScores[difficulty] || 0)) {
+    // The score represents the last level the user completed successfully
+    // No need to adjust it here since we're already passing the correct value
+    if (score > (currentData.highScores[difficulty.toLowerCase()] || 0)) {
       await setDoc(
         userDocRef,
         {
           ...currentData,
           highScores: {
             ...currentData.highScores,
-            [difficulty]: score,
+            [difficulty.toLowerCase()]: score,
           },
         },
         { merge: true }
