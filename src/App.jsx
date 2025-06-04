@@ -1,8 +1,9 @@
 import React from "react";
-
 import padsData from "./pads";
-
 import Pad from "./Pad";
+import { useAuth } from "./AuthContext.jsx";
+import { updateHighScore, getHighScores } from "./firebase.js";
+import HighScores from "./components/HighScores";
 
 const LEVELS = {
   EASY: "easy",
@@ -12,8 +13,16 @@ const LEVELS = {
   HARD: "hard",
 };
 
+const SETUP_STAGES = {
+  DIFFICULTY: "difficulty",
+  SPEED: "speed",
+};
+
 export default function App() {
+  const { user, login, logout, highScores, setHighScores } = useAuth();
+
   const [difficulty, setDifficulty] = React.useState(LEVELS.MEDIUM);
+  const [setupStage, setSetupStage] = React.useState(SETUP_STAGES.DIFFICULTY);
 
   const [pads, setPads] = React.useState(padsData);
 
@@ -34,6 +43,15 @@ export default function App() {
   const cancelRef = React.useRef(false);
 
   const [showStartScreen, setShowStartScreen] = React.useState(true);
+
+  React.useEffect(() => {
+    if (user) {
+      getHighScores(user.uid).then((scores) => {
+        setHighScores(scores);
+      });
+    }
+  }, [user, setHighScores]);
+
   React.useEffect(() => {
     switch (difficulty) {
       case LEVELS.EASY:
@@ -61,15 +79,13 @@ export default function App() {
   }
 
   function generateRandomPad() {
-    return pads[Math.floor(Math.random() * (pads.length + 1))].id;
+    return pads[Math.floor(Math.random() * pads.length)].id;
   }
 
   async function showSequence(seq) {
     const sequenceDelay = speed === "fast" ? 200 : 350;
 
     setIsShowingSequence(true);
-
-    await delay(sequenceDelay);
 
     for (let id of seq) {
       if (cancelRef.current) break;
@@ -94,64 +110,67 @@ export default function App() {
 
   async function startGame() {
     const initialPad = generateRandomPad();
-
     const newSequence = [initialPad];
-
     setGameStarted(true);
-
     cancelRef.current = true;
-
     await delay(50);
-
     cancelRef.current = false;
-
     setSequence(newSequence);
-
     setUserStep(0);
-
     setGameOver(false);
-
     setUserInput([]);
-
-    await delay(1000);
-
+    await delay(250);
     await showSequence(newSequence);
+  }
+
+  async function handleGameOver(finalScore) {
+    setGameOver(true);
+    if (user) {
+      const wasHighScore = await updateHighScore(
+        user.uid,
+        difficulty,
+        finalScore
+      );
+      if (wasHighScore) {
+        const newScores = await getHighScores(user.uid);
+        setHighScores(newScores);
+      }
+    }
   }
 
   async function handleUserClick(id) {
     if (!gameStarted || gameOver || isShowingSequence) return;
+
     setUserInput((prev) => [...prev, pads.find((p) => p.id === id)]);
+
     setPads((prev) =>
       prev.map((item) => (item.id === id ? { ...item, on: true } : item))
     );
+    await delay(100);
     setPads((prev) =>
       prev.map((item) => (item.id === id ? { ...item, on: false } : item))
     );
+
     const isCorrect = id === sequence[userStep];
     const isOnLastStep = userStep === sequence.length - 1;
 
-    if (isCorrect) {
-      setUserStep((prev) => prev + 1);
-      if (isOnLastStep) {
-        await delay(300);
-        const nextPad = generateRandomPad();
-        const newSequence = [...sequence, nextPad];
-        setSequence(newSequence);
-        setUserStep(0);
-        setUserInput([]);
-        await delay(500);
-        await showSequence(newSequence);
-        setUserInput([]);
-      }
-    } else {
-      setGameOver(true);
+    if (!isCorrect) {
+      handleGameOver(sequence.length - 1);
+      return;
     }
-  }
 
-  function playAgain() {
-    setGameOver(false);
-    setSpeed(null);
-    setGameStarted(false);
+    if (isCorrect && isOnLastStep) {
+      const nextPad = generateRandomPad();
+      const newSequence = [...sequence, nextPad];
+      setUserStep(0);
+      setSequence(newSequence);
+      await delay(250);
+      setUserInput([]);
+      await delay(500);
+      await showSequence(newSequence);
+    } else {
+      setUserStep((prev) => prev + 1);
+    }
   }
 
   const buttonElements = pads.map((padProperties) => (
@@ -167,19 +186,41 @@ export default function App() {
   function changeDifficulty(level) {
     cancelRef.current = true;
     setDifficulty(level);
-    setSequence([]);
-    setUserStep(0);
-    setGameOver(false);
-    setGameStarted(false);
-    setUserInput([]);
-    setSpeed(null);
   }
+
+  function handleContinue() {
+    setSetupStage(SETUP_STAGES.SPEED);
+  }
+
   function handleAdvanceToMain() {
     setShowStartScreen(false);
   }
 
+  function resetGame() {
+    setGameStarted(false);
+    setGameOver(false);
+    setSpeed(null);
+    setSetupStage(SETUP_STAGES.DIFFICULTY);
+    setDifficulty(LEVELS.MEDIUM);
+    setSequence([]);
+    setUserStep(0);
+    setUserInput([]);
+  }
+
   return (
     <>
+      <div className="auth-buttons">
+        {user ? (
+          <button className="auth-button" onClick={logout}>
+            Sign Out
+          </button>
+        ) : (
+          <button className="auth-button" onClick={login}>
+            Sign in with Google
+          </button>
+        )}
+      </div>
+      <HighScores />
       {showStartScreen ? (
         <div className="start-screen">
           <h1>Welcome to Chelo Says!</h1>
@@ -193,56 +234,68 @@ export default function App() {
           <header>
             {!gameStarted && (
               <div className="controls">
-                <button
-                  className="easyButton control-button"
-                  onClick={() => changeDifficulty(LEVELS.EASY)}
-                >
-                  Easy
-                </button>
-                <button
-                  className="mediumButton control-button"
-                  onClick={() => changeDifficulty(LEVELS.MEDIUM)}
-                >
-                  Medium
-                </button>
-                <button
-                  className="hardButton control-button"
-                  onClick={() => changeDifficulty(LEVELS.HARD)}
-                >
-                  Hard
-                </button>
-                <div className="speedAndStart">
-                  <div>
-                    <div>
-                      <div
-                        className="speed-toggle control-button"
-                        onClick={() =>
-                          setSpeed((prev) =>
-                            prev === "fast" ? "slow" : "fast"
-                          )
-                        }
-                      >
-                        <span
-                          className={speed === "slow" ? "active-speed" : ""}
-                        >
-                          🐢 Slow
-                        </span>
-                        <span
-                          className={speed === "fast" ? "active-speed" : ""}
-                        >
-                          Fast 🚀
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <button
-                    className="startButton control-button"
-                    onClick={startGame}
-                    disabled={!speed}
-                  >
-                    Go
-                  </button>
-                </div>
+                {setupStage === SETUP_STAGES.DIFFICULTY && (
+                  <>
+                    <button
+                      className={`easyButton control-button ${
+                        difficulty === LEVELS.EASY ? "active" : ""
+                      }`}
+                      onClick={() => changeDifficulty(LEVELS.EASY)}
+                    >
+                      Easy
+                    </button>
+                    <button
+                      className={`mediumButton control-button ${
+                        difficulty === LEVELS.MEDIUM ? "active" : ""
+                      }`}
+                      onClick={() => changeDifficulty(LEVELS.MEDIUM)}
+                    >
+                      Medium
+                    </button>
+                    <button
+                      className={`hardButton control-button ${
+                        difficulty === LEVELS.HARD ? "active" : ""
+                      }`}
+                      onClick={() => changeDifficulty(LEVELS.HARD)}
+                    >
+                      Hard
+                    </button>
+                    <button
+                      className="continueButton control-button"
+                      onClick={handleContinue}
+                      disabled={!difficulty}
+                    >
+                      Continue
+                    </button>
+                  </>
+                )}
+                {setupStage === SETUP_STAGES.SPEED && (
+                  <>
+                    <button
+                      className={`slowButton control-button ${
+                        speed === "slow" ? "active" : ""
+                      }`}
+                      onClick={() => setSpeed("slow")}
+                    >
+                      🐢 Slow
+                    </button>
+                    <button
+                      className={`fastButton control-button ${
+                        speed === "fast" ? "active" : ""
+                      }`}
+                      onClick={() => setSpeed("fast")}
+                    >
+                      Fast 🚀
+                    </button>
+                    <button
+                      className="startButton control-button"
+                      onClick={startGame}
+                      disabled={!speed}
+                    >
+                      Go
+                    </button>
+                  </>
+                )}
               </div>
             )}
             <div className="status-bar">
@@ -254,7 +307,7 @@ export default function App() {
                   >{`Game Over!`}</button>
                   <button
                     className="play-again control-button"
-                    onClick={playAgain}
+                    onClick={resetGame}
                   >
                     {`Score: ${sequence.length - 1}`}
                     <br />
