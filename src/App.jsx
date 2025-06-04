@@ -79,7 +79,8 @@ export default function App() {
   }
 
   function generateRandomPad() {
-    return pads[Math.floor(Math.random() * pads.length)].id;
+    const randomIndex = Math.floor(Math.random() * pads.length);
+    return pads[randomIndex].id;
   }
 
   async function showSequence(seq) {
@@ -211,11 +212,25 @@ export default function App() {
     <>
       <div className="auth-buttons">
         {user ? (
-          <button className="auth-button" onClick={logout}>
+          <button
+            className="auth-button"
+            onClick={logout}
+            disabled={gameStarted}
+            title={gameStarted ? "Cannot sign out during gameplay" : "Sign Out"}
+          >
             Sign Out
           </button>
         ) : (
-          <button className="auth-button" onClick={login}>
+          <button
+            className="auth-button"
+            onClick={login}
+            disabled={gameStarted}
+            title={
+              gameStarted
+                ? "Cannot sign in during gameplay"
+                : "Sign in with Google"
+            }
+          >
             Sign in with Google
           </button>
         )}

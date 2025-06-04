@@ -414,7 +414,20 @@ header {
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
 }
 
-.auth-button:hover {
+.auth-button:disabled {
+  background: linear-gradient(145deg, #a8a8a8, #d4d4d4);
+  cursor: not-allowed;
+  opacity: 0.7;
+  transform: none;
+  box-shadow: none;
+}
+
+.auth-button:disabled:hover {
+  transform: none;
+  box-shadow: none;
+}
+
+.auth-button:hover:not(:disabled) {
   transform: translateY(-2px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
 }
@@ -444,6 +457,7 @@ header {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.1);
   animation: pulseRed 2s infinite;
+  padding-bottom: 5rem;
 }
 
 .play-again {
@@ -454,6 +468,7 @@ header {
   text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   border: 2px solid rgba(255, 255, 255, 0.1);
   animation: pulsePlay 2s infinite;
+  padding-bottom: 5rem;
 }
 
 @keyframes pulseRed {
