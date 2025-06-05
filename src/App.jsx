@@ -2,24 +2,24 @@ import React from "react";
 import padsData from "./pads";
 import Pad from "./Pad";
 import { useAuth } from "./AuthContext.jsx";
-import { updateHighScore, getHighScores } from "./firebase.js";
+import {
+  updateHighScore,
+  signInWithGoogle,
+  getLeaderboard,
+  initializeLeaderboards,
+  checkNicknameExists,
+  setUserNickname,
+} from "./firebase.js";
 import HighScores from "./components/HighScores";
-
-const LEVELS = {
-  EASY: "easy",
-
-  MEDIUM: "medium",
-
-  HARD: "hard",
-};
-
-const SETUP_STAGES = {
-  DIFFICULTY: "difficulty",
-  SPEED: "speed",
-};
+import Leaderboard from "./components/Leaderboard";
+import NicknameModal from "./components/NicknameModal";
+import { LEVELS, SETUP_STAGES } from "./constants";
 
 export default function App() {
   const { user, login, logout, highScores, setHighScores } = useAuth();
+  const [showNicknameModal, setShowNicknameModal] = React.useState(false);
+  const [showLeaderboard, setShowLeaderboard] = React.useState(false);
+  const [hasNickname, setHasNickname] = React.useState(false);
 
   const [difficulty, setDifficulty] = React.useState(LEVELS.MEDIUM);
   const [setupStage, setSetupStage] = React.useState(SETUP_STAGES.DIFFICULTY);
@@ -42,12 +42,53 @@ export default function App() {
 
   const cancelRef = React.useRef(false);
 
-  const [showStartScreen, setShowStartScreen] = React.useState(true);
+  const [showStartScreen, setShowStartScreen] = React.useState(!user);
+
+  React.useEffect(() => {
+    initializeLeaderboards().catch(console.error);
+  }, []);
 
   React.useEffect(() => {
     if (user) {
-      getHighScores(user.uid).then((scores) => {
-        setHighScores(scores);
+      setShowStartScreen(false);
+    }
+  }, [user]);
+
+  React.useEffect(() => {
+    async function checkNickname() {
+      if (user) {
+        const exists = await checkNicknameExists(user.uid);
+        setHasNickname(exists);
+        if (!exists) {
+          setShowNicknameModal(true);
+        }
+      } else {
+        setHasNickname(false);
+        setShowNicknameModal(false);
+      }
+    }
+    checkNickname();
+  }, [user]);
+
+  React.useEffect(() => {
+    if (user) {
+      getLeaderboard("easy").then((easyScores) => {
+        getLeaderboard("medium").then((mediumScores) => {
+          getLeaderboard("hard").then((hardScores) => {
+            const userScores = {
+              easy:
+                easyScores.find((entry) => entry.userId === user.uid)?.score ||
+                0,
+              medium:
+                mediumScores.find((entry) => entry.userId === user.uid)
+                  ?.score || 0,
+              hard:
+                hardScores.find((entry) => entry.userId === user.uid)?.score ||
+                0,
+            };
+            setHighScores(userScores);
+          });
+        });
       });
     }
   }, [user, setHighScores]);
@@ -128,14 +169,40 @@ export default function App() {
   async function handleGameOver(finalScore) {
     setGameOver(true);
     if (user) {
+      console.log(
+        "Game over with score:",
+        finalScore,
+        "difficulty:",
+        difficulty
+      );
       const wasHighScore = await updateHighScore(
         user.uid,
         difficulty,
         finalScore
       );
+      console.log("Was high score:", wasHighScore);
       if (wasHighScore) {
-        const newScores = await getHighScores(user.uid);
-        setHighScores(newScores);
+        try {
+          const [easyScores, mediumScores, hardScores] = await Promise.all([
+            getLeaderboard("easy"),
+            getLeaderboard("medium"),
+            getLeaderboard("hard"),
+          ]);
+
+          const userScores = {
+            easy:
+              easyScores.find((entry) => entry.userId === user.uid)?.score || 0,
+            medium:
+              mediumScores.find((entry) => entry.userId === user.uid)?.score ||
+              0,
+            hard:
+              hardScores.find((entry) => entry.userId === user.uid)?.score || 0,
+          };
+          console.log("Updated user scores:", userScores);
+          setHighScores(userScores);
+        } catch (error) {
+          console.error("Error updating high scores:", error);
+        }
       }
     }
   }
@@ -164,6 +231,28 @@ export default function App() {
     if (isCorrect && isOnLastStep) {
       const nextPad = generateRandomPad();
       const newSequence = [...sequence, nextPad];
+
+      // Check if current score beats high score and update in real-time
+      if (user) {
+        const currentScore = newSequence.length - 1;
+        const currentHighScore = highScores[difficulty.toLowerCase()] || 0;
+
+        if (currentScore > currentHighScore) {
+          setHighScores((prev) => ({
+            ...prev,
+            [difficulty.toLowerCase()]: currentScore,
+          }));
+
+          updateHighScore(user.uid, difficulty, currentScore).catch((error) => {
+            console.error("Error updating high score:", error);
+            setHighScores((prev) => ({
+              ...prev,
+              [difficulty.toLowerCase()]: currentHighScore,
+            }));
+          });
+        }
+      }
+
       setUserStep(0);
       setSequence(newSequence);
       await delay(250);
@@ -186,6 +275,7 @@ export default function App() {
   ));
 
   function changeDifficulty(level) {
+    console.log("Changing difficulty to:", level);
     cancelRef.current = true;
     setDifficulty(level);
   }
@@ -209,40 +299,129 @@ export default function App() {
     setUserInput([]);
   }
 
+  const handleLogin = async () => {
+    try {
+      await login();
+    } catch (error) {
+      console.error("Error during login:", error);
+    }
+  };
+
+  const handleNicknameSubmit = async (nickname) => {
+    try {
+      if (!user) throw new Error("No user logged in");
+      await setUserNickname(user.uid, nickname);
+      setHasNickname(true);
+      setShowNicknameModal(false);
+    } catch (error) {
+      console.error("Error setting nickname:", error);
+      if (error.message === "Nickname already set") {
+        setShowNicknameModal(false);
+        setHasNickname(true);
+      }
+    }
+  };
+
+  // Disable game controls if nickname not set
+  const isGameDisabled = user && !hasNickname;
+
   return (
     <>
-      <div className="auth-buttons">
-        {user ? (
-          <button
-            className="auth-button"
-            onClick={logout}
-            disabled={gameStarted}
-            title={gameStarted ? "Cannot sign out during gameplay" : "Sign Out"}
-          >
-            Sign Out
-          </button>
-        ) : (
-          <button
-            className="auth-button"
-            onClick={login}
-            disabled={gameStarted}
-            title={
-              gameStarted
-                ? "Cannot sign in during gameplay"
-                : "Sign in with Google"
-            }
-          >
-            Sign in
-          </button>
-        )}
-      </div>
+      {!showStartScreen && (
+        <div className="auth-buttons">
+          {user ? (
+            <>
+              <button
+                className="auth-button"
+                onClick={logout}
+                disabled={gameStarted}
+                title={
+                  gameStarted ? "Cannot sign out during gameplay" : "Sign Out"
+                }
+              >
+                Sign Out
+              </button>
+              {hasNickname && (
+                <button
+                  className="leaderboard-button control-button"
+                  onClick={() => setShowLeaderboard(true)}
+                  disabled={gameStarted}
+                >
+                  Leaderboards
+                </button>
+              )}
+            </>
+          ) : (
+            <button
+              className="auth-button"
+              onClick={handleLogin}
+              disabled={gameStarted}
+              title={
+                gameStarted
+                  ? "Cannot sign in during gameplay"
+                  : "Sign in with Google"
+              }
+            >
+              Sign in with Google
+            </button>
+          )}
+        </div>
+      )}
+
       <HighScores />
+
+      {showNicknameModal && (
+        <NicknameModal onSubmit={handleNicknameSubmit} canClose={false} />
+      )}
+
+      {showLeaderboard && (
+        <Leaderboard onClose={() => setShowLeaderboard(false)} />
+      )}
+
       {showStartScreen ? (
         <div className="start-screen">
           <h1>Welcome to Chelo Says!</h1>
           <p>Let's see if you can make Chelo proud.</p>
-          <button className="start-button" onClick={handleAdvanceToMain}>
-            Start Game
+          {user ? (
+            <button
+              className="auth-button"
+              onClick={logout}
+              disabled={gameStarted}
+              title={
+                gameStarted ? "Cannot sign out during gameplay" : "Sign Out"
+              }
+            >
+              Sign Out
+            </button>
+          ) : (
+            <button
+              className="auth-button"
+              onClick={handleLogin}
+              disabled={gameStarted}
+              title={
+                gameStarted
+                  ? "Cannot sign in during gameplay"
+                  : "Sign in with Google"
+              }
+            >
+              Sign in with Google
+            </button>
+          )}
+          {user && hasNickname && (
+            <button
+              className="leaderboard-button control-button"
+              onClick={() => setShowLeaderboard(true)}
+              disabled={gameStarted}
+            >
+              Leaderboards
+            </button>
+          )}
+          <button
+            className="start-button"
+            onClick={handleAdvanceToMain}
+            disabled={isGameDisabled}
+          >
+            {isGameDisabled ? "Set nickname to play" : "Start Game"}
           </button>
         </div>
       ) : (
@@ -257,6 +436,7 @@ export default function App() {
                         difficulty === LEVELS.EASY ? "active" : ""
                       }`}
                       onClick={() => changeDifficulty(LEVELS.EASY)}
+                      disabled={isGameDisabled}
                     >
                       Easy
                     </button>
@@ -265,6 +445,7 @@ export default function App() {
                         difficulty === LEVELS.MEDIUM ? "active" : ""
                       }`}
                       onClick={() => changeDifficulty(LEVELS.MEDIUM)}
+                      disabled={isGameDisabled}
                     >
                       Medium
                     </button>
@@ -273,13 +454,14 @@ export default function App() {
                         difficulty === LEVELS.HARD ? "active" : ""
                       }`}
                       onClick={() => changeDifficulty(LEVELS.HARD)}
+                      disabled={isGameDisabled}
                     >
                       Hard
                     </button>
                     <button
                       className="continueButton control-button"
                       onClick={handleContinue}
-                      disabled={!difficulty}
+                      disabled={isGameDisabled}
                     >
                       Continue
                     </button>

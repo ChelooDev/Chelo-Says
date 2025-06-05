@@ -1,8 +1,22 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../AuthContext";
+import { getUserData } from "../firebase";
 
 export default function HighScores() {
   const { user, highScores } = useAuth();
+  const [nickname, setNickname] = useState("");
+
+  useEffect(() => {
+    async function fetchNickname() {
+      if (user) {
+        const userData = await getUserData(user.uid);
+        if (userData?.nickname) {
+          setNickname(userData.nickname);
+        }
+      }
+    }
+    fetchNickname();
+  }, [user]);
 
   if (!user) return null;
 
@@ -23,6 +37,14 @@ export default function HighScores() {
           <span>{highScores.hard}</span>
         </div>
       </div>
+      {nickname && (
+        <div className="nickname-display">
+          <span className="nickname-label">Player:</span>
+          <span className="nickname-value" title={nickname}>
+            {nickname}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
