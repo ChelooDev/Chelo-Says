@@ -57,9 +57,9 @@ export default function App() {
   React.useEffect(() => {
     async function checkNickname() {
       if (user) {
-        const exists = await checkNicknameExists(user.uid);
-        setHasNickname(exists);
-        if (!exists) {
+        const nickExists = await checkNicknameExists(user.uid);
+        setHasNickname(nickExists);
+        if (!nickExists) {
           setShowNicknameModal(true);
         }
       } else {

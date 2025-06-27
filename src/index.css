@@ -255,7 +255,7 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.75rem, 2vw, 1rem);
+  gap: 2.5rem;
   margin: 0 auto;
   max-width: 1200px;
   width: 100%;
@@ -266,8 +266,8 @@ header {
 
 .grid-wrap {
   position: relative;
-  width: min(500px, 80vw);
-  height: min(500px, 80vw);
+  width: min(700px, 90vw);
+  height: min(700px, 90vw);
   margin: 0 auto;
 }
 
@@ -284,28 +284,33 @@ header {
 
 .easy {
   grid-template-columns: repeat(2, 1fr);
-  gap: clamp(1rem, 4vw, 2rem);
+  gap: clamp(2rem, 4vw, 3rem);
 }
 
 .medium {
   grid-template-columns: repeat(3, 1fr);
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(1rem, 2vw, 1.5rem);
 }
 
 .hard {
   grid-template-columns: repeat(4, 1fr);
-  gap: clamp(0.5rem, 2vw, 1rem);
+  gap: clamp(0.75rem, 1.5vw, 1rem);
 }
 
 .pad-button {
-  aspect-ratio: 1;
+  font-size: 2.2rem;
+  min-width: 0;
+  min-height: 0;
   width: 100%;
-  border: 3px solid white;
-  border-radius: clamp(10px, 2vw, 30px);
+  height: 100%;
+  aspect-ratio: 1/1;
+  border-width: 6px;
+  border: 4px solid white;
+  border-radius: clamp(15px, 3vw, 40px);
   cursor: pointer;
   opacity: 0.4;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
 }
 
 .pad-button.on {
@@ -381,7 +386,7 @@ header {
   }
 
   .pad-button {
-    border-width: 5px;
+    border-width: 6px;
   }
 
   .high-scores {
@@ -440,6 +445,17 @@ header {
 
   header {
     min-height: 160px;
+  }
+}
+
+@media (max-height: 768px) and (orientation: landscape) {
+  .start-screen {
+    max-height: 20%;
+  }
+
+  .grid-wrap {
+    width: min(600px, 80vh);
+    height: min(600px, 80vh);
   }
 }
 
@@ -684,11 +700,6 @@ header {
   }
 }
 
-@media (max-height: 768px) and (orientation: landscape) {
-  .start-screen {
-    max-height: 20%;
-  }
-}
 .status-bar {
   display: flex;
   flex-direction: row;
@@ -775,7 +786,7 @@ header {
   border-radius: 20px;
   padding: 2rem;
   width: min(90vw, 800px);
-  max-height: 90vh;
+  max-height: 140vh;
   overflow-y: auto;
   position: relative;
   box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
@@ -785,7 +796,7 @@ header {
 .leaderboard-content h2 {
   text-align: center;
   color: white;
-  font-size: 2rem;
+  font-size: 4rem;
   margin-bottom: 2rem;
 }
 
@@ -1059,4 +1070,322 @@ header {
 
 .start-screen .start-button {
   margin-top: 2rem;
+}
+
+/* Make leaderboard and signup buttons bigger on desktop */
+@media (min-width: 769px) {
+  .leaderboard-button,
+  .auth-button {
+    font-size: 1.4rem;
+    padding: 1.2rem 2.2rem;
+    min-width: 200px;
+    border-radius: 14px;
+  }
+}
+
+/* --- GLOBAL: Prevent all scrolling and overflow, support safe area --- */
+html, body {
+  height: 100dvh;
+  width: 100vw;
+  min-height: 100dvh;
+  min-width: 100vw;
+  max-height: 100dvh;
+  max-width: 100vw;
+  overflow: hidden !important;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  box-sizing: border-box;
+  background-color: #1c1917;
+}
+
+#root {
+  height: 100dvh;
+  width: 100vw;
+  min-height: 100dvh;
+  min-width: 100vw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* --- GAME AREA: Centered, maximal, no scroll, always visible --- */
+.game-area {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  min-width: 0;
+  min-height: 0;
+  z-index: 1;
+  pointer-events: auto;
+  background: none;
+  gap: 2.5rem;
+  padding: 0;
+}
+
+.grid-wrap {
+  position: relative;
+  width: min(90vw, 90vh);
+  height: min(90vw, 90vh);
+  aspect-ratio: 1/1;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  background: none;
+}
+
+.easy, .medium, .hard {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1/1;
+  position: absolute;
+  top: 0; left: 0;
+  align-items: center;
+  justify-items: center;
+  pointer-events: auto;
+}
+
+/* --- Make sure pads fill grid cells --- */
+.pad-button {
+  font-size: 2.2rem;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1/1;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border: 6px solid white;
+  border-radius: clamp(15px, 3vw, 40px);
+  cursor: pointer;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  background-clip: padding-box;
+  z-index: 3;
+}
+
+.pad-button.on {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+/* --- Responsive grid gaps for all difficulties --- */
+.easy {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(1.5vw, 2vw, 2vh);
+}
+.medium {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: clamp(1vw, 1.5vw, 1.5vh);
+}
+.hard {
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: clamp(0.5vw, 1vw, 1vh);
+}
+
+/* --- Controls, status, overlays: always fixed, never push grid --- */
+header, .controls, .status-bar, .high-scores, .auth-buttons {
+  position: fixed;
+  z-index: 10;
+  pointer-events: auto;
+  background: none;
+}
+header {
+  top: env(safe-area-inset-top, 0);
+  left: 0; right: 0;
+  width: 100vw;
+  min-height: 60px;
+  max-height: 10vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: none;
+  margin: 0;
+  padding: 0;
+}
+.controls {
+  top: calc(env(safe-area-inset-top, 0) + 0.5rem);
+  left: 0; right: 0;
+  width: 100vw;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  background: none;
+}
+.status-bar {
+  bottom: calc(env(safe-area-inset-bottom, 0) + 1.5rem);
+  left: 0; right: 0;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  background: none;
+}
+.high-scores {
+  top: calc(env(safe-area-inset-top, 0) + 1rem);
+  right: calc(env(safe-area-inset-right, 0) + 1rem);
+  left: auto;
+  position: fixed;
+  z-index: 20;
+}
+.auth-buttons {
+  top: calc(env(safe-area-inset-top, 0) + 1rem);
+  left: calc(env(safe-area-inset-left, 0) + 1rem);
+  z-index: 20;
+}
+
+/* --- Overlays/Modals: block scroll, always centered --- */
+.leaderboard-overlay, .nickname-modal-overlay {
+  position: fixed !important;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-width: 100vw;
+  min-height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  overflow: hidden !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: auto;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(5px);
+}
+.leaderboard-content, .nickname-modal {
+  max-height: 90vh;
+  max-width: 95vw;
+  overflow: auto;
+  pointer-events: auto;
+}
+
+/* --- User sequence bar: fixed at bottom, never pushes grid --- */
+.user-sequence {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0) + 1.5rem);
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.5rem, 1vw, 0.75rem);
+  justify-content: center;
+  max-width: 90vw;
+  padding: 0.5rem 1rem;
+  background: rgba(0,0,0,0.2);
+  border-radius: 1rem;
+}
+
+/* --- Responsive: landscape/portrait, all breakpoints --- */
+@media (orientation: landscape) {
+  .game-area, .grid-wrap {
+    width: min(90vw, 90vh);
+    height: min(90vw, 90vh);
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+  .grid-wrap {
+    margin-top: 0;
+  }
+  header {
+    min-height: 40px;
+    max-height: 8vh;
+  }
+  .controls {
+    top: calc(env(safe-area-inset-top, 0) + 0.25rem);
+  }
+}
+@media (max-width: 768px), (max-height: 768px) {
+  .game-area, .grid-wrap {
+    width: min(98vw, 98vh);
+    height: min(98vw, 98vh);
+    max-width: 98vw;
+    max-height: 98vh;
+  }
+  .pad-button {
+    border-width: 6px;
+  }
+}
+@media (max-width: 480px), (max-height: 480px) {
+  .game-area, .grid-wrap {
+    width: min(100vw, 100vh);
+    height: min(100vw, 100vh);
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+  .pad-button {
+    border-width: 8px;
+  }
+}
+
+/* --- Hide scrollbars everywhere --- */
+body, html, .game-area, .grid-wrap, .leaderboard-overlay, .nickname-modal-overlay {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+body::-webkit-scrollbar, html::-webkit-scrollbar, .game-area::-webkit-scrollbar, .grid-wrap::-webkit-scrollbar, .leaderboard-overlay::-webkit-scrollbar, .nickname-modal-overlay::-webkit-scrollbar {
+  display: none;
+}
+
+/* Make leaderboard and signup buttons bigger on desktop */
+@media (min-width: 769px) {
+  .leaderboard-button,
+  .auth-button {
+    font-size: 1.4rem;
+    padding: 1.2rem 2.2rem;
+    min-width: 200px;
+    border-radius: 14px;
+  }
+}
+
+@media (min-width: 769px), (orientation: landscape) {
+  .controls {
+    margin-bottom: 2.5rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    width: min(90vw, 90vh);
+    max-width: min(90vw, 90vh);
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.2rem;
+  }
+  .control-button {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: unset;
+    width: auto;
+    box-sizing: border-box;
+  }
+  .game-area {
+    padding-top: 5.5rem;
+  }
 }
