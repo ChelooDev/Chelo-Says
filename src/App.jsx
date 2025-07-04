@@ -368,7 +368,7 @@ export default function App() {
         </div>
       )}
 
-      <HighScores />
+      {!isMobile && <HighScores />}
 
       {showNicknameModal && (
         <NicknameModal onSubmit={handleNicknameSubmit} canClose={false} />
