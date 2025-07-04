@@ -20,29 +20,25 @@ export default function App() {
   const [showNicknameModal, setShowNicknameModal] = React.useState(false);
   const [showLeaderboard, setShowLeaderboard] = React.useState(false);
   const [hasNickname, setHasNickname] = React.useState(false);
-
   const [difficulty, setDifficulty] = React.useState(LEVELS.MEDIUM);
   const [setupStage, setSetupStage] = React.useState(SETUP_STAGES.DIFFICULTY);
-
   const [pads, setPads] = React.useState(padsData);
-
   const [sequence, setSequence] = React.useState([]);
-
   const [userStep, setUserStep] = React.useState(0);
-
   const [gameOver, setGameOver] = React.useState(false);
-
   const [gameStarted, setGameStarted] = React.useState(false);
-
   const [isShowingSequence, setIsShowingSequence] = React.useState(false);
-
   const [userInput, setUserInput] = React.useState([]);
-
   const [speed, setSpeed] = React.useState(null);
-
   const cancelRef = React.useRef(false);
 
-  const [showStartScreen, setShowStartScreen] = React.useState(!user);
+  // Detect mobile device (simple width check)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth <= 768;
+
+  const [showStartScreen, setShowStartScreen] = React.useState(() => {
+    if (isMobile) return false;
+    return !user;
+  });
 
   React.useEffect(() => {
     initializeLeaderboards().catch(console.error);
@@ -329,19 +325,21 @@ export default function App() {
     <>
       {!showStartScreen && (
         <div className="auth-buttons">
-          {user ? (
-            <>
-              <button
-                className="auth-button"
-                onClick={logout}
-                disabled={gameStarted}
-                title={
-                  gameStarted ? "Cannot sign out during gameplay" : "Sign Out"
-                }
-              >
-                Sign Out
-              </button>
-              {hasNickname && (
+          {!isMobile && (
+            user ? (
+              <>
+                <button
+                  className="auth-button"
+                  onClick={logout}
+                  disabled={gameStarted}
+                  title={
+                    gameStarted
+                      ? "Cannot sign out during gameplay"
+                      : "Sign Out"
+                  }
+                >
+                  Sign Out
+                </button>
                 <button
                   className="leaderboard-button control-button"
                   onClick={() => setShowLeaderboard(true)}
@@ -349,21 +347,23 @@ export default function App() {
                 >
                   Leaderboards
                 </button>
-              )}
-            </>
-          ) : (
-            <button
-              className="auth-button"
-              onClick={handleLogin}
-              disabled={gameStarted}
-              title={
-                gameStarted
-                  ? "Cannot sign in during gameplay"
-                  : "Sign in with Google"
-              }
-            >
-              Sign in with Google
-            </button>
+              </>
+            ) : (
+              <>
+                <button
+                  className="auth-button"
+                  onClick={handleLogin}
+                  disabled={gameStarted}
+                  title={
+                    gameStarted
+                      ? "Cannot sign in during gameplay"
+                      : "Sign in with Google"
+                  }
+                >
+                  Sign in with Google
+                </button>
+              </>
+            )
           )}
         </div>
       )}
@@ -427,102 +427,89 @@ export default function App() {
       ) : (
         <>
           <header>
-            {!gameStarted && (
-              <div className="controls">
-                {setupStage === SETUP_STAGES.DIFFICULTY && (
-                  <>
-                    <button
-                      className={`easyButton control-button ${
-                        difficulty === LEVELS.EASY ? "active" : ""
-                      }`}
-                      onClick={() => changeDifficulty(LEVELS.EASY)}
-                      disabled={isGameDisabled}
-                    >
-                      Easy
-                    </button>
-                    <button
-                      className={`mediumButton control-button ${
-                        difficulty === LEVELS.MEDIUM ? "active" : ""
-                      }`}
-                      onClick={() => changeDifficulty(LEVELS.MEDIUM)}
-                      disabled={isGameDisabled}
-                    >
-                      Medium
-                    </button>
-                    <button
-                      className={`hardButton control-button ${
-                        difficulty === LEVELS.HARD ? "active" : ""
-                      }`}
-                      onClick={() => changeDifficulty(LEVELS.HARD)}
-                      disabled={isGameDisabled}
-                    >
-                      Hard
-                    </button>
-                    <button
-                      className="continueButton control-button"
-                      onClick={handleContinue}
-                      disabled={isGameDisabled}
-                    >
-                      Continue
-                    </button>
-                  </>
-                )}
-                {setupStage === SETUP_STAGES.SPEED && (
-                  <>
-                    <button
-                      className={`slowButton control-button ${
-                        speed === "slow" ? "active" : ""
-                      }`}
-                      onClick={() => setSpeed("slow")}
-                    >
-                      🐢 Slow
-                    </button>
-                    <button
-                      className={`normalButton control-button ${
-                        speed === "normal" ? "active" : ""
-                      }`}
-                      onClick={() => setSpeed("normal")}
-                    >
-                      ⚡ Normal
-                    </button>
-                    <button
-                      className={`fastButton control-button ${
-                        speed === "fast" ? "active" : ""
-                      }`}
-                      onClick={() => setSpeed("fast")}
-                    >
-                      Fast 🚀
-                    </button>
-                    <button
-                      className="startButton control-button"
-                      onClick={startGame}
-                      disabled={!speed}
-                    >
-                      Go
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-            <div className="status-bar">
-              {gameOver ? (
-                <div className="after-game">
+            <div className="controls">
+              {(!gameStarted && setupStage === SETUP_STAGES.DIFFICULTY) && (
+                <>
                   <button
-                    className="game-over control-button"
-                    disabled={true}
-                  >{`Game Over!`}</button>
-                  <button
-                    className="play-again control-button"
-                    onClick={resetGame}
+                    className={`easyButton control-button ${
+                      difficulty === LEVELS.EASY ? "active" : ""
+                    }`}
+                    onClick={() => changeDifficulty(LEVELS.EASY)}
+                    disabled={isGameDisabled}
                   >
-                    {`Score: ${sequence.length - 1}`}
-                    <br />
-                    Play again?
+                    Easy
                   </button>
-                </div>
-              ) : gameStarted ? (
-                <div className="level-indicator control-button">{`Level: ${sequence.length}`}</div>
-              ) : null}
+                  <button
+                    className={`mediumButton control-button ${
+                      difficulty === LEVELS.MEDIUM ? "active" : ""
+                    }`}
+                    onClick={() => changeDifficulty(LEVELS.MEDIUM)}
+                    disabled={isGameDisabled}
+                  >
+                    Medium
+                  </button>
+                  <button
+                    className={`hardButton control-button ${
+                      difficulty === LEVELS.HARD ? "active" : ""
+                    }`}
+                    onClick={() => changeDifficulty(LEVELS.HARD)}
+                    disabled={isGameDisabled}
+                  >
+                    Hard
+                  </button>
+                  <button
+                    className="continueButton control-button"
+                    onClick={handleContinue}
+                    disabled={isGameDisabled}
+                  >
+                    Continue
+                  </button>
+                </>
+              )}
+              {(!gameStarted && setupStage === SETUP_STAGES.SPEED) && (
+                <>
+                  <button
+                    className={`slowButton control-button ${
+                      speed === "slow" ? "active" : ""
+                    }`}
+                    onClick={() => setSpeed("slow")}
+                  >
+                    🐢 Slow
+                  </button>
+                  <button
+                    className={`normalButton control-button ${
+                      speed === "normal" ? "active" : ""
+                    }`}
+                    onClick={() => setSpeed("normal")}
+                  >
+                    ⚡ Normal
+                  </button>
+                  <button
+                    className={`fastButton control-button ${
+                      speed === "fast" ? "active" : ""
+                    }`}
+                    onClick={() => setSpeed("fast")}
+                  >
+                    Fast 🚀
+                  </button>
+                  <button
+                    className="startButton control-button"
+                    onClick={startGame}
+                    disabled={!speed}
+                  >
+                    Go
+                  </button>
+                </>
+              )}
+              {(gameStarted || gameOver) && (
+                <>
+                  {gameOver ? (
+                    <button className="game-over control-button" onClick={resetGame}>{`Game Over! Score: ${sequence.length - 1}`}</button>
+                  ) : (
+                    <button className="level-indicator control-button" disabled>{`Level ${sequence.length}`}</button>
+                  )}
+                </>
+              )}
             </div>
           </header>
           <main>

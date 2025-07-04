@@ -143,6 +143,8 @@ body {
   overflow: hidden;
   height: 100vh;
   width: 100vw;
+  min-width: 900px;
+  min-height: 900px;
 }
 
 body::before {
@@ -255,31 +257,33 @@ header {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: clamp(0.75rem, 2vw, 1rem);
-  margin: 0 auto;
-  max-width: 1200px;
+  justify-content: flex-start;
   width: 100%;
-  padding-top: 1rem;
-  position: relative;
-  height: calc(100vh - 80px);
+  min-height: 100vh;
+  box-sizing: border-box;
+  padding-bottom: 2.5rem;
 }
 
 .grid-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   position: relative;
-  width: min(700px, 90vw);
-  height: min(700px, 90vw);
-  margin: 0 auto;
 }
 
 .easy,
 .medium,
 .hard {
   display: grid;
-  width: 100%;
-  height: 100%;
+  width: 80%;
+  height: 80%;
+  aspect-ratio: 1/1;
   position: absolute;
-  top: 0;
-  left: 0;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  justify-items: center;
 }
 
 .easy {
@@ -298,14 +302,21 @@ header {
 }
 
 .pad-button {
-  aspect-ratio: 1;
+  font-size: 2.2rem;
+  min-width: 0;
+  min-height: 0;
   width: 100%;
+  height: 100%;
+  aspect-ratio: 1/1;
+  border-width: 6px;
   border: 4px solid white;
   border-radius: clamp(15px, 3vw, 40px);
   cursor: pointer;
   opacity: 0.4;
   transition: all 0.3s ease;
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .pad-button.on {
@@ -315,21 +326,11 @@ header {
 }
 
 .user-sequence {
+  margin-top: 0.7rem;
+  margin-bottom: 0.7rem;
   display: flex;
-  flex-wrap: wrap;
-  gap: clamp(0.5rem, 1vw, 0.75rem);
   justify-content: center;
-  max-width: 90%;
-  padding: var(--spacing-md);
-}
-
-.user-sequence-item {
-  width: clamp(30px, 6vw, 45px);
-  height: clamp(30px, 6vw, 45px);
-  border: 2px solid white;
-  border-radius: 6px;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  gap: 0.4rem;
 }
 
 .buttons-container {
@@ -341,18 +342,23 @@ header {
 }
 
 @media (max-width: 768px) {
-  .buttons-container {
-    grid-template-columns: 1fr;
+  .grid-wrap {
+    width: 100vw !important;
+    height: 100vw !important;
+    max-width: 100vw !important;
+    max-height: 100vw !important;
   }
-
-  .controls {
-    flex-direction: column;
-    align-items: center;
+  .controls, .grid-wrap > .controls {
+    margin-bottom: 0.3rem !important;
   }
-
-  .control-button {
-    width: 100%;
-    max-width: 400px;
+  .game-area {
+    padding: 0 !important;
+  }
+  .user-sequence {
+    width: 100vw !important;
+    max-width: 100vw !important;
+    margin-left: 0 !important;
+    margin-right: 0 !important;
   }
 }
 
@@ -365,8 +371,19 @@ header {
   }
 
   .controls {
-    margin-top: 7rem;
-    gap: 1.5rem;
+    position: static !important;
+    width: 100%;
+    margin-bottom: 1.2rem;
+    margin-top: 0;
+    z-index: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.7rem;
+  }
+
+  .game-area {
+    gap: 0;
   }
 
   .slowButton,
@@ -374,10 +391,6 @@ header {
   .fastButton {
     font-size: 3rem;
     padding: 2rem 3.5rem;
-  }
-
-  .game-area {
-    margin-top: 4rem;
   }
 
   .pad-button {
@@ -427,15 +440,18 @@ header {
     gap: 2rem;
   }
 
-  .level-indicator {
-    font-size: 2.5rem;
-    padding: 2rem;
+  .level-indicator.control-button {
+    font-size: 1rem;
+    padding: 0.2rem 0.7rem;
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 0.3rem;
   }
 
-  .user-sequence-item {
-    width: clamp(50px, 10vw, 70px);
-    height: clamp(50px, 10vw, 70px);
-    border-width: 3px;
+  .user-sequence {
+    margin-top: 0.3rem;
+    margin-bottom: 0.3rem;
+    gap: 0.2rem;
   }
 
   header {
@@ -540,14 +556,41 @@ header {
   backdrop-filter: blur(10px);
 }
 .level-indicator {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  gap: 1rem;
+  pointer-events: auto;
+  background: linear-gradient(145deg, #63deed, #afeeee);
+  color: #1c1917;
+  font-weight: bold;
+  text-shadow: none;
+  font-size: 2rem;
+  padding: 0.7rem 0 0.7rem 0;
+  margin-bottom: 0.2rem;
+  text-align: center;
+  width: 100%;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(99,222,237,0.08);
 }
 .level-indicator .control-button {
   margin-right: 2rem;
+}
+
+.level-indicator.control-button {
+  display: inline-block;
+  font-size: 1.4rem;
+  padding: 1.5rem 2.5rem;
+  min-width: 90px;
+  max-width: 180px;
+  border-radius: 10px;
+  margin: 0 auto;
+  box-shadow: 0 2px 8px rgba(99,222,237,0.08);
+  background: linear-gradient(145deg, #63deed, #afeeee);
+  color: #1c1917;
+  font-weight: bold;
+  text-align: center;
+  border: 2px solid #63deed;
+  letter-spacing: 1px;
+  font-family: inherit;
+  height: auto;
+  opacity: 1;
 }
 
 .high-scores {
@@ -696,20 +739,15 @@ header {
 }
 
 .status-bar {
+  position: static;
+  width: 100%;
   display: flex;
-  flex-direction: row;
-  align-items: center;
   justify-content: center;
-  gap: 1rem;
-  width: auto;
-}
-
-.level-indicator {
-  width: 20%;
-  background: linear-gradient(145deg, #63deed, #afeeee);
-  color: #1c1917;
-  font-weight: bold;
-  text-shadow: none;
+  align-items: center;
+  z-index: 10;
+  background: none;
+  pointer-events: none;
+  margin-bottom: 0.5rem;
 }
 
 .game-over {
@@ -763,16 +801,21 @@ header {
 
 /* Leaderboard Styles */
 .leaderboard-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  position: fixed !important;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-width: 100vw;
+  min-height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  overflow: hidden !important;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
+  pointer-events: auto;
+  background: rgba(0,0,0,0.85);
   backdrop-filter: blur(5px);
 }
 
@@ -930,16 +973,21 @@ header {
 
 /* Nickname Modal Styles */
 .nickname-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.85);
+  position: fixed !important;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-width: 100vw;
+  min-height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  overflow: hidden !important;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   z-index: 1000;
+  pointer-events: auto;
+  background: rgba(0,0,0,0.85);
   backdrop-filter: blur(5px);
 }
 
@@ -1065,4 +1113,400 @@ header {
 
 .start-screen .start-button {
   margin-top: 2rem;
+}
+
+/* Make leaderboard and signup buttons bigger on desktop */
+@media (min-width: 769px) {
+  .leaderboard-button,
+  .auth-button {
+    font-size: 1.4rem;
+    padding: 1.2rem 2.2rem;
+    min-width: 200px;
+    border-radius: 14px;
+  }
+}
+
+/* --- GLOBAL: Prevent all scrolling and overflow, support safe area --- */
+html, body {
+  height: 100dvh;
+  width: 100vw;
+  min-height: 100dvh;
+  min-width: 100vw;
+  max-height: 100dvh;
+  max-width: 100vw;
+  overflow: hidden !important;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  padding: env(safe-area-inset-top, 0) env(safe-area-inset-right, 0) env(safe-area-inset-bottom, 0) env(safe-area-inset-left, 0);
+  box-sizing: border-box;
+  background-color: #1c1917;
+}
+
+#root {
+  height: 100dvh;
+  width: 100vw;
+  min-height: 100dvh;
+  min-width: 100vw;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+/* --- GAME AREA: Centered, maximal, no scroll, always visible --- */
+.game-area {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100vw;
+  height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  min-width: 0;
+  min-height: 0;
+  z-index: 1;
+  pointer-events: auto;
+  background: none;
+  gap: 2.5rem;
+  padding: 0;
+}
+
+.grid-wrap {
+  position: relative;
+  width: min(70vw, 60vh);
+  height: min(70vw, 60vh);
+  aspect-ratio: 1/1;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2;
+  background: none;
+}
+
+.easy, .medium, .hard {
+  display: grid;
+  width: 80%;
+  height: 80%;
+  aspect-ratio: 1/1;
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  justify-items: center;
+}
+
+/* --- Make sure pads fill grid cells --- */
+.pad-button {
+  font-size: 2.2rem;
+  min-width: 0;
+  min-height: 0;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1/1;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  border: 6px solid white;
+  border-radius: clamp(15px, 3vw, 40px);
+  cursor: pointer;
+  opacity: 0.4;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
+  outline: none !important;
+  -webkit-tap-highlight-color: transparent;
+  background-clip: padding-box;
+  z-index: 3;
+}
+
+.pad-button.on {
+  opacity: 1;
+  transform: scale(1.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.8);
+}
+
+/* --- Responsive grid gaps for all difficulties --- */
+.easy {
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: clamp(1.5vw, 2vw, 2vh);
+}
+.medium {
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  gap: clamp(1vw, 1.5vw, 1.5vh);
+}
+.hard {
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: clamp(0.5vw, 1vw, 1vh);
+}
+
+/* --- Controls, status, overlays: always fixed, never push grid --- */
+header, .controls, .status-bar, .high-scores, .auth-buttons {
+  position: fixed;
+  z-index: 10;
+  pointer-events: auto;
+  background: none;
+}
+header {
+  top: env(safe-area-inset-top, 0);
+  left: 0; right: 0;
+  width: 100vw;
+  min-height: 60px;
+  max-height: 10vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  background: none;
+  margin: 0;
+  padding: 0;
+}
+.controls {
+  top: calc(env(safe-area-inset-top, 0) + 0.5rem);
+  left: 0; right: 0;
+  width: 100vw;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.5rem;
+  background: none;
+}
+.status-bar {
+  bottom: calc(env(safe-area-inset-bottom, 0) + 1.5rem);
+  left: 0; right: 0;
+  width: 100vw;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  background: none;
+}
+.high-scores {
+  top: calc(env(safe-area-inset-top, 0) + 1rem);
+  right: calc(env(safe-area-inset-right, 0) + 1rem);
+  left: auto;
+  position: fixed;
+  z-index: 20;
+}
+.auth-buttons {
+  top: calc(env(safe-area-inset-top, 0) + 1rem);
+  left: calc(env(safe-area-inset-left, 0) + 1rem);
+  z-index: 20;
+}
+
+/* --- Overlays/Modals: block scroll, always centered --- */
+.leaderboard-overlay, .nickname-modal-overlay {
+  position: fixed !important;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100vw;
+  height: 100dvh;
+  min-width: 100vw;
+  min-height: 100dvh;
+  max-width: 100vw;
+  max-height: 100dvh;
+  overflow: hidden !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  pointer-events: auto;
+  background: rgba(0,0,0,0.85);
+  backdrop-filter: blur(5px);
+}
+.leaderboard-content, .nickname-modal {
+  max-height: 90vh;
+  max-width: 95vw;
+  overflow: auto;
+  pointer-events: auto;
+}
+
+/* --- User sequence bar: fixed at bottom, never pushes grid --- */
+.user-sequence {
+  position: fixed;
+  left: 50%;
+  bottom: calc(env(safe-area-inset-bottom, 0) + 1.5rem);
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  flex-wrap: wrap;
+  gap: clamp(0.5rem, 1vw, 0.75rem);
+  justify-content: center;
+  max-width: 90vw;
+  background: rgba(0,0,0,0.2);
+  border-radius: 1rem;
+}
+
+/* --- Responsive: landscape/portrait, all breakpoints --- */
+@media (orientation: landscape) {
+  .game-area, .grid-wrap {
+    width: min(90vw, 90vh);
+    height: min(90vw, 90vh);
+    max-width: 90vw;
+    max-height: 90vh;
+  }
+  .grid-wrap {
+    margin-top: 0;
+  }
+  header {
+    min-height: 40px;
+    max-height: 8vh;
+  }
+  .controls {
+    top: calc(env(safe-area-inset-top, 0) + 0.25rem);
+  }
+}
+@media (max-width: 768px), (max-height: 768px) {
+  .game-area, .grid-wrap {
+    width: min(98vw, 98vh);
+    height: min(98vw, 98vh);
+    max-width: 98vw;
+    max-height: 98vh;
+  }
+  .pad-button {
+    border-width: 6px;
+  }
+}
+@media (max-width: 480px), (max-height: 480px) {
+  .grid-wrap {
+    width: min(90vw, 50vh);
+    height: min(90vw, 50vh);
+  }
+  .game-area {
+    padding-top: 3.2rem;
+  }
+  .pad-button {
+    border-width: 8px;
+  }
+}
+
+/* --- Hide scrollbars everywhere --- */
+body, html, .game-area, .grid-wrap, .leaderboard-overlay, .nickname-modal-overlay {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+body::-webkit-scrollbar, html::-webkit-scrollbar, .game-area::-webkit-scrollbar, .grid-wrap::-webkit-scrollbar, .leaderboard-overlay::-webkit-scrollbar, .nickname-modal-overlay::-webkit-scrollbar {
+  display: none;
+}
+
+/* Make leaderboard and signup buttons bigger on desktop */
+@media (min-width: 769px) {
+  .leaderboard-button,
+  .auth-button {
+    font-size: 1.4rem;
+    padding: 1.2rem 2.2rem;
+    min-width: 200px;
+    border-radius: 14px;
+  }
+}
+
+@media (min-width: 769px), (orientation: landscape) {
+  .controls {
+    margin-bottom: 2.5rem;
+    position: fixed;
+    left: 0;
+    right: 0;
+    z-index: 20;
+    width: min(90vw, 90vh);
+    max-width: min(90vw, 90vh);
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.2rem;
+  }
+  .control-button {
+    flex: 1 1 0;
+    min-width: 0;
+    max-width: unset;
+    width: auto;
+    box-sizing: border-box;
+  }
+  .game-area {
+    padding-top: 2rem;
+  }
+}
+
+.level-badge {
+  display: inline-block;
+  background: linear-gradient(145deg, #63deed, #afeeee);
+  color: #1c1917;
+  font-weight: bold;
+  font-size: 1.1rem;
+  padding: 0.35em 1.1em;
+  border-radius: 1.2em;
+  box-shadow: 0 2px 8px rgba(99,222,237,0.08);
+  letter-spacing: 1px;
+  margin: 0 auto;
+  border: 2px solid #63deed;
+  min-width: 48px;
+  text-align: center;
+  user-select: none;
+}
+
+@media (orientation: portrait) {
+  .controls,
+  .auth-buttons {
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+  }
+  .controls {
+    position: static !important;
+    width: 100%;
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+    z-index: auto;
+    display: flex;
+  }
+  .game-area {
+    gap: 0;
+  }
+  .control-button,
+  .auth-button,
+  .leaderboard-button {
+    font-size: 1rem;
+    padding: 0.2rem 0.5rem;
+    min-width: 120px;
+    max-width: 150px;
+    border-radius: 10px;
+    box-sizing: border-box;
+    margin: 0;
+  }
+  .pad-button {
+    border-width: 2px !important;
+  }
+}
+
+.user-sequence-item {
+  height: 25px;
+  width: 25px;
+  border: 2px solid white;
+  border-radius: 6px;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  display: inline-block;
+}
+
+.game-over.control-button {
+  max-width: 280px;
+  min-width: 140px;
+  font-size: 1.4rem;
+  font-family: inherit;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-sizing: border-box;
 }
